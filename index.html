@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My AI Assistant ⚡</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #101827;
+      color: white;
+      text-align: center;
+      padding: 30px 16px;
+    }
+    main {
+      max-width: 480px;
+      margin: 30px auto;
+      background: #1e293b;
+      padding: 24px;
+      border-radius: 18px;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      margin: 12px 0;
+      border: 0;
+      border-radius: 10px;
+      background: #38bdf8;
+      color: #082f49;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    #status {
+      color: #bae6fd;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+    #answer {
+      background: #0f172a;
+      padding: 14px;
+      border-radius: 10px;
+      min-height: 24px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>My AI Assistant ⚡</h1>
+    <p>Your first voice-controlled assistant!</p>
+
+    <button id="speak">Make my assistant speak</button>
+    <button id="listen">Try a voice command 🎤</button>
+
+    <p id="status">Ready when you are.</p>
+    <h3>Assistant's answer</h3>
+    <p id="answer">Tap a button to begin.</p>
+  </main>
+
+  <script>
+    const statusText = document.getElementById("status");
+    const answerText = document.getElementById("answer");
+
+    function speak(message) {
+      if (!("speechSynthesis" in window)) {
+        statusText.textContent = "Speech is not supported in this browser.";
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+      const voice = new SpeechSynthesisUtterance(message);
+      voice.lang = "en-ZA";
+      voice.onstart = () => {
+        statusText.textContent = "Speaking...";
+      };
+      voice.onend = () => {
+        statusText.textContent = "Ready for your next command.";
+      };
+      window.speechSynthesis.speak(voice);
+      answerText.textContent = message;
+    }
+
+    document.getElementById("speak").addEventListener("click", () => {
+      speak("Hello! I am your AI assistant. I am ready to learn with you.");
+    });
+
+    function answerCommand(command) {
+      const text = command.toLowerCase();
+      let reply;
+
+      if (text.includes("hello") || text.includes("hi")) {
+        reply = "Hello! How can I help you?";
+      } else if (text.includes("your name") || text.includes("who are you")) {
+        reply = "I am your personal assistant, built by you!";
+      } else if (text.includes("what can you do")) {
+        reply = "I can listen for simple commands and speak my answers.";
+      } else if (text.includes("time")) {
+        reply = "The time on your device is " +
+          new Date().toLocaleTimeString();
+      } else if (text.includes("thank")) {
+        reply = "You are welcome!";
+      } else if (text.includes("goodbye") || text.includes("bye")) {
+        reply = "Goodbye! Talk to you again soon.";
+      } else {
+        reply = "I heard you say: " + command +
+          ". I do not know how to answer that yet.";
+      }
+
+      speak(reply);
+    }
+
+    document.getElementById("listen").addEventListener("click", () => {
+      const Recognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      if (!Recognition) {
+        statusText.textContent =
+          "Voice recognition is unavailable here. Try a supported browser.";
+        return;
+      }
+
+      const recognition = new Recognition();
+      recognition.lang = "en-ZA";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      statusText.textContent = "Requesting microphone access...";
+
+      recognition.onstart = () => {
+        statusText.textContent = "Listening! Say hello.";
+      };
+
+      recognition.onresult = (event) => {
+        const command = event.results[0][0].transcript;
+        answerText.textContent = "You said: " + command;
+        answerCommand(command);
+      };
+
+      recognition.onerror = (event) => {
+        statusText.textContent =
+          "Voice error: " + event.error +
+          ". Check microphone permission and browser support.";
+      };
+
+      recognition.onend = () => {
+        if (statusText.textContent === "Listening! Say hello.") {
+          statusText.textContent = "Finished listening.";
+        }
+      };
+
+      recognition.start();
+    });
+  </script>
+</body>
+  </html>
+    
