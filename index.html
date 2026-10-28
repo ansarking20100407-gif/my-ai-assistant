@@ -1,15 +1,13 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My AI Assistant</title>
-
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -19,7 +17,7 @@
       justify-content: center;
       align-items: center;
       background: #0b1020;
-      color: #ffffff;
+      color: white;
       font-family: Arial, sans-serif;
     }
 
@@ -34,15 +32,9 @@
       box-shadow: 0 12px 35px #00000040;
     }
 
-    h1 {
-      color: #70c8ff;
-      margin-top: 0;
-    }
+    h1 { color: #70c8ff; }
 
-    .subtitle {
-      color: #bdc9df;
-      line-height: 1.5;
-    }
+    .subtitle, .note { color: #bdc9df; }
 
     #answerText {
       min-height: 65px;
@@ -60,7 +52,7 @@
       min-height: 24px;
       color: #9db5d9;
       font-size: 14px;
-      margin: 12px 0;
+      line-height: 1.5;
     }
 
     input {
@@ -87,16 +79,10 @@
       cursor: pointer;
     }
 
-    button:disabled {
-      opacity: 0.55;
-    }
-
-    button.secondary {
-      background: #293653;
-    }
+    button:disabled { opacity: 0.55; }
+    button.secondary { background: #293653; }
 
     .note {
-      color: #9db5d9;
       font-size: 12px;
       line-height: 1.5;
       margin-top: 18px;
@@ -107,13 +93,12 @@
 <body>
   <main class="container">
     <h1>⚡ My AI Assistant</h1>
-
     <p class="subtitle">
       Ask me a question by typing or speaking.
     </p>
 
     <div id="answerText" aria-live="polite">
-      Hello! I'm ready to help you. Ask me anything!
+      Hello! I'm ready to help you.
     </div>
 
     <p id="statusText">Ready!</p>
@@ -126,10 +111,7 @@
         autocomplete="off"
         required
       >
-
-      <button id="askButton" type="submit">
-        Ask AI
-      </button>
+      <button id="askButton" type="submit">Ask AI</button>
     </form>
 
     <button id="voiceButton" class="secondary" type="button">
@@ -145,8 +127,8 @@
     </button>
 
     <p class="note">
-      Requires internet access. AI answers are provided by Vireonix.
-      Don't enter passwords or sensitive personal information.
+      Internet required. Answers come from Vireonix.
+      Do not enter passwords or private information.
     </p>
   </main>
 
@@ -160,16 +142,12 @@
     const speakButton = document.getElementById("speakButton");
     const stopButton = document.getElementById("stopButton");
 
-    let latestAnswer =
-      "Hello! I'm your AI assistant. Ask me a question!";
-
     function speak(message) {
-      latestAnswer = message;
       answerText.textContent = message;
 
       if (!("speechSynthesis" in window)) {
         statusText.textContent =
-          "Your browser does not support spoken answers.";
+          "Your browser cannot speak answers. The text is displayed.";
         return;
       }
 
@@ -180,17 +158,17 @@
       speech.rate = 1;
       speech.pitch = 1;
 
-      speech.onstart = function () {
+      speech.onstart = () => {
         statusText.textContent = "Speaking...";
       };
 
-      speech.onend = function () {
+      speech.onend = () => {
         statusText.textContent = "Ready for your next question!";
       };
 
-      speech.onerror = function () {
+      speech.onerror = () => {
         statusText.textContent =
-          "Answer displayed. Speech may not be available.";
+          "Answer displayed, but speech may be unavailable.";
       };
 
       window.speechSynthesis.speak(speech);
@@ -206,7 +184,7 @@
 
       window.speechSynthesis.cancel();
       answerText.textContent = "You asked: " + question;
-      statusText.textContent = "Thinking... Please wait.";
+      statusText.textContent = "Connecting to AI...";
       askButton.disabled = true;
       voiceButton.disabled = true;
 
@@ -224,11 +202,11 @@
                 {
                   role: "system",
                   content:
-                    "You are a helpful, friendly personal AI assistant. " +
-                    "Answer questions clearly and accurately. " +
-                    "Use simple language when appropriate. " +
-                    "If you are unsure, say so. " +
-                    "Keep answers reasonably concise for spoken responses."
+                    "You are a helpful, friendly AI assistant. " +
+                    "Answer clearly and accurately. " +
+                    "Use simple language when useful. " +
+                    "Admit when you are unsure. " +
+                    "Keep answers reasonably concise for speech."
                 },
                 {
                   role: "user",
@@ -240,8 +218,11 @@
         );
 
         if (!response.ok) {
+          const details = await response.text().catch(() => "");
+          console.error("Vireonix HTTP error:", response.status, details);
           throw new Error(
-            "The AI service returned error " + response.status
+            "AI service error " + response.status +
+            ". Please try again later."
           );
         }
 
@@ -249,52 +230,48 @@
         const reply = data?.choices?.[0]?.message?.content;
 
         if (typeof reply !== "string" || !reply.trim()) {
-          throw new Error("The AI service returned no answer.");
+          console.error("Unexpected AI response:", data);
+          throw new Error(
+            "The AI service returned no readable answer."
+          );
         }
 
         speak(reply.trim());
 
       } catch (error) {
-        console.error("AI connection error:", error);
+        console.error("AI connection diagnostic:", error);
 
         answerText.textContent =
           "Sorry, I couldn't get an AI answer right now.";
 
         if (error instanceof TypeError) {
           statusText.textContent =
-            "Connection failed. Check your internet or try again later. " +
-            "The browser may also be blocking the AI connection.";
+            "Browser/network error: the request could not be completed. " +
+            "Possible causes include CORS restrictions or a network issue.";
         } else {
           statusText.textContent = error.message;
         }
+
       } finally {
         askButton.disabled = false;
         voiceButton.disabled = false;
       }
     }
 
-    questionForm.addEventListener("submit", function (event) {
+    questionForm.addEventListener("submit", function(event) {
       event.preventDefault();
-
-      const question = questionInput.value.trim();
-
-      if (question) {
-        answerCommand(question);
-      }
+      answerCommand(questionInput.value);
     });
 
-    speakButton.addEventListener("click", function () {
+    speakButton.addEventListener("click", function() {
       speak(
         "Hello! I'm your AI assistant. " +
-        "You can type a question or use the microphone to speak to me."
+        "Type a question or use the microphone to speak to me."
       );
     });
 
-    stopButton.addEventListener("click", function () {
-      if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
-
+    stopButton.addEventListener("click", function() {
+      window.speechSynthesis.cancel();
       statusText.textContent = "Speech stopped.";
     });
 
@@ -304,16 +281,13 @@
 
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
-
       recognition.lang = "en-ZA";
       recognition.continuous = false;
       recognition.interimResults = false;
 
-      voiceButton.addEventListener("click", function () {
+      voiceButton.addEventListener("click", function() {
         try {
-          statusText.textContent =
-            "Listening! Ask your question.";
-
+          statusText.textContent = "Listening! Ask your question.";
           recognition.start();
         } catch (error) {
           statusText.textContent =
@@ -321,33 +295,23 @@
         }
       });
 
-      recognition.onresult = function (event) {
-        const command =
-          event.results[0][0].transcript;
-
+      recognition.onresult = function(event) {
+        const command = event.results[0][0].transcript;
         questionInput.value = command;
         answerCommand(command);
       };
 
-      recognition.onerror = function (event) {
+      recognition.onerror = function(event) {
         statusText.textContent =
           event.error === "not-allowed"
             ? "Please allow microphone access in your browser."
             : "I couldn't hear that clearly. Please try again.";
       };
 
-      recognition.onend = function () {
-        if (statusText.textContent ===
-            "Listening! Ask your question.") {
-          statusText.textContent = "Ready!";
-        }
-      };
-
     } else {
-      voiceButton.addEventListener("click", function () {
+      voiceButton.addEventListener("click", function() {
         statusText.textContent =
-          "Voice recognition isn't supported in this browser. " +
-          "Please type your question instead.";
+          "Voice recognition isn't supported here. Please type instead.";
       });
     }
   </script>
