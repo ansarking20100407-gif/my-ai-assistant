@@ -1,10 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My AI Assistant ⚡</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,6 +13,7 @@
       text-align: center;
       padding: 30px 16px;
     }
+
     main {
       max-width: 480px;
       margin: 30px auto;
@@ -20,6 +21,7 @@
       padding: 24px;
       border-radius: 18px;
     }
+
     button {
       display: block;
       width: 100%;
@@ -31,29 +33,44 @@
       color: #082f49;
       font-size: 16px;
       font-weight: bold;
+      cursor: pointer;
     }
+
+    button:active {
+      opacity: 0.8;
+    }
+
     #status {
       color: #bae6fd;
       line-height: 1.5;
       overflow-wrap: anywhere;
     }
+
     #answer {
       background: #0f172a;
       padding: 14px;
       border-radius: 10px;
       min-height: 24px;
+      overflow-wrap: anywhere;
     }
   </style>
 </head>
+
 <body>
   <main>
     <h1>My AI Assistant ⚡</h1>
-    <p>Your first voice-controlled assistant!</p>
+    <p>Your personal voice-controlled assistant!</p>
 
-    <button id="speak">Make my assistant speak</button>
-    <button id="listen">Try a voice command 🎤</button>
+    <button id="speak">
+      Make my assistant speak
+    </button>
+
+    <button id="listen">
+      Try a voice command 🎤
+    </button>
 
     <p id="status">Ready when you are.</p>
+
     <h3>Assistant's answer</h3>
     <p id="answer">Tap a button to begin.</p>
   </main>
@@ -62,157 +79,214 @@
     const statusText = document.getElementById("status");
     const answerText = document.getElementById("answer");
 
+    // Make the assistant speak aloud.
     function speak(message) {
+      answerText.textContent = message;
+
       if (!("speechSynthesis" in window)) {
-        statusText.textContent = "Speech is not supported in this browser.";
+        statusText.textContent =
+          "Speech is not supported in this browser.";
         return;
       }
 
       window.speechSynthesis.cancel();
+
       const voice = new SpeechSynthesisUtterance(message);
       voice.lang = "en-ZA";
+      voice.rate = 1;
+      voice.pitch = 1;
+
       voice.onstart = () => {
         statusText.textContent = "Speaking...";
       };
+
       voice.onend = () => {
-        statusText.textContent = "Ready for your next command.";
+        statusText.textContent =
+          "Ready for your next command.";
       };
+
+      voice.onerror = (event) => {
+        statusText.textContent =
+          "Speech error: " + event.error +
+          ". Check your browser and speech settings.";
+      };
+
+      statusText.textContent = "Preparing speech...";
+
       window.speechSynthesis.speak(voice);
-      answerText.textContent = message;
     }
 
-    document.getElementById("speak").addEventListener("click", () => {
-      speak("Hello! I am your AI assistant. I am ready to learn with you.");
-    });
+    // Test the speaking feature.
+    document.getElementById("speak").addEventListener(
+      "click", () => {
+        speak(
+          "Hello! I am your personal assistant. " +
+          "I am ready to learn with you."
+        );
+      }
+    );
 
+    // Improved answer command.
     function answerCommand(command) {
-  const text = command.toLowerCase().trim();
-  let reply;
+      const text = command.toLowerCase().trim();
+      let reply;
 
-  if (/\b(hello|hi|hey)\b/.test(text)) {
-    reply = "Hello! How can I help you today?";
+      if (/\b(hello|hi|hey)\b/.test(text)) {
+        reply = "Hello! How can I help you today?";
 
-  } else if (
-    text.includes("your name") ||
-    text.includes("who are you")
-  ) {
-    reply = "I am your personal assistant, built by you!";
+      } else if (
+        text.includes("your name") ||
+        text.includes("who are you")
+      ) {
+        reply =
+          "I am your personal assistant, built by you!";
 
-  } else if (
-    text.includes("what can you do") ||
-    text.includes("your features")
-  ) {
-    reply = "I can listen to your voice, answer programmed questions, tell you the time and date, and speak my answers aloud.";
+      } else if (
+        text.includes("what can you do") ||
+        text.includes("your features")
+      ) {
+        reply =
+          "I can listen to your voice, answer programmed " +
+          "questions, tell you the time and date, and " +
+          "speak my answers aloud.";
 
-  } else if (text.includes("time")) {
-    reply = "The time on your device is " +
-      new Date().toLocaleTimeString();
-
-  } else if (text.includes("date") || text.includes("day is it")) {
-    reply = "Today's date is " +
-      new Date().toLocaleDateString("en-ZA", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-      });
-
-  } else if (text.includes("thank")) {
-    reply = "You're welcome! I'm happy to help.";
-
-  } else if (
-    text.includes("how are you") ||
-    text.includes("how are things")
-  ) {
-    reply = "I'm working well and ready to help you!";
-
-  } else if (
-    text.includes("your creator") ||
-    text.includes("who built you")
-  ) {
-    reply = "You are building me, one improvement at a time!";
-
-  } else if (
-    text.includes("goodbye") ||
-    /\bbye\b/.test(text)
-  ) {
-    reply = "Goodbye! I'll be ready when you return.";
-
-  } else if (
-    text.includes("thank you") ||
-    text.includes("help me")
-  ) {
-    reply = "I'll do my best to help. Please tell me what you need.";
-
-  } else {
-    reply = "I heard you say: " + command +
-      ". I don't know the answer to that yet, but we can teach me more responses.";
-  }
-
-  speak(reply);
-}
-      
-      } else if (text.includes("your name") || text.includes("who are you")) {
-        reply = "I am your personal assistant, built by you!";
-      } else if (text.includes("what can you do")) {
-        reply = "I can listen for simple commands and speak my answers.";
       } else if (text.includes("time")) {
         reply = "The time on your device is " +
           new Date().toLocaleTimeString();
-      } else if (text.includes("thank")) {
-        reply = "You are welcome!";
-      } else if (text.includes("goodbye") || text.includes("bye")) {
-        reply = "Goodbye! Talk to you again soon.";
+
+      } else if (
+        text.includes("date") ||
+        text.includes("day is it")
+      ) {
+        reply = "Today's date is " +
+          new Date().toLocaleDateString("en-ZA", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+          });
+
+      } else if (
+        text.includes("how are you") ||
+        text.includes("how are things")
+      ) {
+        reply =
+          "I am working well and ready to help you!";
+
+      } else if (
+        text.includes("your creator") ||
+        text.includes("who built you")
+      ) {
+        reply =
+          "You are building me, one improvement at a time!";
+
+      } else if (
+        text.includes("thank") ||
+        text.includes("you're welcome")
+      ) {
+        reply =
+          "You're welcome! I am happy to help.";
+
+      } else if (
+        text.includes("goodbye") ||
+        /\bbye\b/.test(text)
+      ) {
+        reply =
+          "Goodbye! I will be ready when you return.";
+
+      } else if (
+        text.includes("help me") ||
+        text.includes("what is your purpose")
+      ) {
+        reply =
+          "I am here to answer the questions I have been " +
+          "programmed to recognise. Ask me something!";
+
+      } else if (text.includes("weather")) {
+        reply =
+          "I cannot check live weather yet. " +
+          "That is a feature we can work on later.";
+
+      } else if (
+        text.includes("math") ||
+        text.includes("calculate")
+      ) {
+        reply =
+          "I cannot solve calculations automatically yet, " +
+          "but we can add that ability in a future upgrade.";
+
       } else {
-        reply = "I heard you say: " + command +
-          ". I do not know how to answer that yet.";
+        reply =
+          "I heard you say: " + command +
+          ". I do not know the answer to that yet. " +
+          "We can teach me more responses.";
       }
 
       speak(reply);
     }
 
-    document.getElementById("listen").addEventListener("click", () => {
-      const Recognition =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
+    // Listen for voice commands.
+    document.getElementById("listen").addEventListener(
+      "click", () => {
+        const Recognition =
+          window.SpeechRecognition ||
+          window.webkitSpeechRecognition;
 
-      if (!Recognition) {
-        statusText.textContent =
-          "Voice recognition is unavailable here. Try a supported browser.";
-        return;
-      }
-
-      const recognition = new Recognition();
-      recognition.lang = "en-ZA";
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-
-      statusText.textContent = "Requesting microphone access...";
-
-      recognition.onstart = () => {
-        statusText.textContent = "Listening! Say hello.";
-      };
-
-      recognition.onresult = (event) => {
-        const command = event.results[0][0].transcript;
-        answerText.textContent = "You said: " + command;
-        answerCommand(command);
-      };
-
-      recognition.onerror = (event) => {
-        statusText.textContent =
-          "Voice error: " + event.error +
-          ". Check microphone permission and browser support.";
-      };
-
-      recognition.onend = () => {
-        if (statusText.textContent === "Listening! Say hello.") {
-          statusText.textContent = "Finished listening.";
+        if (!Recognition) {
+          statusText.textContent =
+            "Voice recognition is unavailable in this " +
+            "browser. Try a supported browser.";
+          return;
         }
-      };
 
-      recognition.start();
-    });
+        const recognition = new Recognition();
+
+        recognition.lang = "en-ZA";
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        statusText.textContent =
+          "Requesting microphone access...";
+
+        recognition.onstart = () => {
+          statusText.textContent =
+            "Listening! Say hello.";
+        };
+
+        recognition.onresult = (event) => {
+          const command =
+            event.results[0][0].transcript;
+
+          answerText.textContent =
+            "You said: " + command;
+
+          answerCommand(command);
+        };
+
+        recognition.onerror = (event) => {
+          statusText.textContent =
+            "Voice error: " + event.error +
+            ". Check microphone permission and browser support.";
+        };
+
+        recognition.onend = () => {
+          if (
+            statusText.textContent ===
+            "Listening! Say hello."
+          ) {
+            statusText.textContent =
+              "Finished listening.";
+          }
+        };
+
+        try {
+          recognition.start();
+        } catch (error) {
+          statusText.textContent =
+            "Could not start the microphone. Please try again.";
+        }
+      }
+    );
   </script>
 </body>
-  </html>
-    
+</html>
