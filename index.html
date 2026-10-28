@@ -86,11 +86,72 @@
     });
 
     function answerCommand(command) {
-      const text = command.toLowerCase();
-      let reply;
+  const text = command.toLowerCase().trim();
+  let reply;
 
-      if (text.includes("hello") || text.includes("hi")) {
-        reply = "Hello! How can I help you?";
+  if (/\b(hello|hi|hey)\b/.test(text)) {
+    reply = "Hello! How can I help you today?";
+
+  } else if (
+    text.includes("your name") ||
+    text.includes("who are you")
+  ) {
+    reply = "I am your personal assistant, built by you!";
+
+  } else if (
+    text.includes("what can you do") ||
+    text.includes("your features")
+  ) {
+    reply = "I can listen to your voice, answer programmed questions, tell you the time and date, and speak my answers aloud.";
+
+  } else if (text.includes("time")) {
+    reply = "The time on your device is " +
+      new Date().toLocaleTimeString();
+
+  } else if (text.includes("date") || text.includes("day is it")) {
+    reply = "Today's date is " +
+      new Date().toLocaleDateString("en-ZA", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+
+  } else if (text.includes("thank")) {
+    reply = "You're welcome! I'm happy to help.";
+
+  } else if (
+    text.includes("how are you") ||
+    text.includes("how are things")
+  ) {
+    reply = "I'm working well and ready to help you!";
+
+  } else if (
+    text.includes("your creator") ||
+    text.includes("who built you")
+  ) {
+    reply = "You are building me, one improvement at a time!";
+
+  } else if (
+    text.includes("goodbye") ||
+    /\bbye\b/.test(text)
+  ) {
+    reply = "Goodbye! I'll be ready when you return.";
+
+  } else if (
+    text.includes("thank you") ||
+    text.includes("help me")
+  ) {
+    reply = "I'll do my best to help. Please tell me what you need.";
+
+  } else {
+    reply = "I heard you say: " + command +
+      ". I don't know the answer to that yet, but we can teach me more responses.";
+  }
+
+  speak(reply);
+}
+      
       } else if (text.includes("your name") || text.includes("who are you")) {
         reply = "I am your personal assistant, built by you!";
       } else if (text.includes("what can you do")) {
